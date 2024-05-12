@@ -3,10 +3,6 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/Da4ndo/Hyde-Ext)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Da4ndo/Hyde-Ext)
 
-> [!CAUTION]
-> Hyde-Ext is currently not installable via AUR as we are addressing a critical issue in the code. We anticipate postponing the first release by a day. Thank you for your patience.
-
-
 <div align="center">
 
 ![hyde_banner](https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/hyde-ext_banner.png)
@@ -83,7 +79,10 @@ yay -S hyde-ext
 
 ## 🔄 Changelog
 
-- **Initial Release [v1.0.7+beta] - 05/12/2024**:
+- **Patch Release [v1.1.0] - 06/15/2024**:
+  - 🛠️ Fixed an issue where assets files were not correctly handled in release mode.
+
+- **Initial Release [UNPATCHED] [v1.0.7+beta] - 05/12/2024**:
   - 🚀 First public release of Hyde-Ext.
   - 🛠️ Core functionalities for installation and restoration of HyDE configurations.
   - 🖥️ Basic command-line interface implemented.

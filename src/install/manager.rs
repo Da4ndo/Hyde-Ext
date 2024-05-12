@@ -54,10 +54,10 @@ fn gather_asset_choices(asset_folders: &[&str]) -> Vec<FileEntry> {
     let mut asset_choices = Vec::new();
 
     for folder in asset_folders {
-        let conf_file_path = if cfg!(release) {
-            format!("/usr/share/hyde-ext/assets/{}/{}.toml", folder, folder)
-        } else {
+        let conf_file_path = if cfg!(debug_assertions) {
             format!("assets/{}/{}.toml", folder, folder)
+        } else {
+            format!("/usr/share/hyde-ext/assets/{}/{}.toml", folder, folder)
         };
         if std::env::var("DEBUG").unwrap_or_default() == "true" {
             println!(

@@ -50,6 +50,14 @@ fn main() {
         println!("{} Force mode is activated.", "->".green());
     }
 
+    if std::env::var("DEBUG").unwrap_or_default() == "true" {
+        if cfg!(debug_assertions) {
+            println!("{} Application is running in debug build mode.", ":: Debug:".blue());
+        } else {
+            println!("{} Application is running in release build mode.", ":: Debug:".blue());
+        }
+    }
+
     banner();
 
     match matches.subcommand() {
