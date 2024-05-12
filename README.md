@@ -5,7 +5,7 @@
 
 <div align="center">
 
-![hyde_banner](https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/hyde-ext_banner.png)
+![hyde_banner](https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/imgs/hyde-ext_banner.png)
 
 # Hyde-Ext Project
 
@@ -49,7 +49,7 @@ Hyde-Ext streamlines the setup by installing:
 </td>
 <td>
 
-![cmd1](https://github.com/Da4ndo/Hyde-Ext/blob/main/assets/cmd1.png)
+![cmd1](https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd1.png)
 
 </td>
 </tr>
@@ -62,7 +62,7 @@ Post-upgrade, Hyde-Ext facilitates the restoration of custom configurations from
 </td>
 <td>
 
-![cmd2](https://github.com/Da4ndo/Hyde-Ext/blob/main/assets/cmd2.png)
+![cmd2](https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd2.png)
 
 </td>
 </tr>
