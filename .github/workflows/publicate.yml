@@ -28,7 +28,7 @@ jobs:
     - name: Prepare Environment Variables
       run: |
         echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
-        echo "SAFE_REPO_NAME=$(echo ${{ github.repository }} | sed 's/\//-/g')" >> $GITHUB_ENV
+        echo "SAFE_REPO_NAME=$(echo ${{ github.repository }} | cut -d'/' -f2)" >> $GITHUB_ENV
 
     - name: Echo Variables
       run: |
