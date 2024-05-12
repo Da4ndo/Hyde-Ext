@@ -3,6 +3,10 @@
 ![GitHub contributors](https://img.shields.io/github/contributors/Da4ndo/Hyde-Ext)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Da4ndo/Hyde-Ext)
 
+> [!CAUTION]
+> Hyde-Ext is currently not installable via AUR as we are addressing a critical issue in the code. We anticipate postponing the first release by a day. Thank you for your patience.
+
+
 <div align="center">
 
 ![hyde_banner](https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/hyde-ext_banner.png)
