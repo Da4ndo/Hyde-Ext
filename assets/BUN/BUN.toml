@@ -1,0 +1,5 @@
+[[file]]
+handler="bun"
+description = "This configuration installs Bun, a fast all-in-one JavaScript runtime."
+title = "BUN Setup [BUN]"
+

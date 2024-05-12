@@ -1,0 +1,6 @@
+[[file]]
+handler="ufw"
+description = "UFW setup tailored for standard users and developers. Permitted ports include: {color:blue}22, 80, 443, 3000, 8000, 9090, 24880{/color}. {color:yellow}[REQUIRES]: Sudo privileges.{/color}"
+title = "UFW Configuration [UFW]"
+default=true
+

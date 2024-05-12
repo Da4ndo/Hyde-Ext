@@ -1,0 +1,6 @@
+[[file]]
+handler="packages"
+description = "Installs some utilities, tools and more."
+title = "Packages [PACKAGES]"
+source_path = "./assets/Packages/packages.list"
+default = true

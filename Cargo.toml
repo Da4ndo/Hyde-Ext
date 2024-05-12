@@ -1,0 +1,18 @@
+[package]
+name = "hyde-ext"
+description = "Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (HyDE_CLI) environment. It automates tasks, installs essential tools, manages configurations, and restores settings from backups."
+version = "1.0.7+beta"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "4.5.4"
+walkdir = "2.3"
+regex = "1.10.4"
+term_size = "0.3.2"
+prettytable = "0.10.0"
+dialoguer = "0.11.0"
+colored = "2.1.0"
+toml = "0.8.12"
+serde = { version = "1.0", features = ["derive"] }

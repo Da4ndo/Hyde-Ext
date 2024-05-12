@@ -1,0 +1,7 @@
+[[file]]
+handler="assets"
+source_path = "./assets/FastFetchAssets/pngs"
+target_path = "~/.config/fastfetch/pngs"
+description = "Adding images to {color:blue}fastfetch (alter of neofetch){/color} terminal"
+title = "Fastfetch Images [IMAGES]"
+default = true

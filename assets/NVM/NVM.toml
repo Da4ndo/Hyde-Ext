@@ -1,0 +1,4 @@
+[[file]]
+handler="nvm"
+description = "NVM setup for managing multiple Node.js versions."
+title = "NVM Configuration [NVM]"

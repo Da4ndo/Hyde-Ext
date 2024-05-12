@@ -1,0 +1,31 @@
+[[file]]
+handler="configs"
+source_path = "./assets/Configs/hyprland.conf"
+target_path = "~/.config/hypr/hyprland.conf"
+description = "Configuration for Hyprland, required by auto-layout.sh to manage language settings."
+title = "Hyprland.conf [CONFIG]"
+default = false
+
+[[file]]
+handler="configs"
+source_path = "./assets/Configs/monitors.conf"
+target_path = "~/.config/hypr/monitors.conf"
+description = "Configuration for dual-monitor setup: primary {color:blue}1920x1080{/color}, secondary {color:blue}2560x1080{/color}."
+title = "Monitors.conf [CONFIG]"
+default = true
+
+[[file]]
+handler="configs"
+source_path = "./assets/Configs/userprefs.conf"
+target_path = "~/.config/hypr/userprefs.conf"
+description = "User preferences including screenshot key bindings, swaylock settings, and cursor window rules."
+title = "User-Preferences.conf [CONFIG]"
+default = true
+
+[[file]]
+handler="configs"
+source_path = "./assets/Configs/.zshrc"
+target_path = "~/.zshrc"
+description = "Shell configuration enhancing productivity with {color:blue}zoxide{/color} directory jumping, alias for {color:blue}'ip -c'{/color} as default, {color:blue}fastfetch{/color}, and {color:blue}cargo{/color} environment setup."
+title = ".zshrc [CONFIG]"
+default = true

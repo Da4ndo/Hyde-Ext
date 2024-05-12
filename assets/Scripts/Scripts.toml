@@ -1,0 +1,6 @@
+[[file]]
+handler="scripts"
+source_path = "./assets/Scripts/auto-layout.sh"
+description = "Automatically adjusts keyboard layout based on settings. {color:yellow}[REQUIRES]: Hyprland.conf [CONFIG]{/color}"
+title = "Layout Automation Script [SCRIPTS]"
+
