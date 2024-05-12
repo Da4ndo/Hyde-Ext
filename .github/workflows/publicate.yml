@@ -31,7 +31,9 @@ jobs:
     - name: Archive Release Binary
       run: |
         echo ":: Archiving release binary..."
-        tar -czvf ${{ github.repository }}-${{ github.ref_name }}-x86_64.tar.gz  -C ./ assets -C ./target/release/ hyde-ext
+        REPO_NAME="${{ github.repository }}"
+        SAFE_REPO_NAME="${REPO_NAME/\//-}"
+        tar -czvf ${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz  -C ./ assets -C ./target/release/ hyde-ext
         echo "  -> Archive created successfully."
 
     - name: Upload Release Tarball
