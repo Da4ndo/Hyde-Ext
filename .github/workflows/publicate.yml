@@ -1,4 +1,4 @@
-name: Publicate new release
+name: Publish new release
 
 on:
   release:
@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Build and Release
+    name: Prepare
     runs-on: ubuntu-latest
 
     steps:
@@ -35,13 +35,14 @@ jobs:
         SAFE_REPO_NAME="${REPO_NAME/\//-}"
         tar -czvf ${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz  -C ./ assets -C ./target/release/ hyde-ext
         echo "  -> Archive created successfully."
+        ls
 
-    - name: Upload Release Tarball
+    - name: Upload Gzip of Release Binary
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./${{ github.repository }}-${{ github.ref_name }}-x86_64.tar.gz
-        asset_name: ${{ github.repository }}-${{ github.ref_name }}-x86_64.tar.gz
+        asset_path: ./${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz
+        asset_name: ${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz
         asset_content_type: application/gzip
