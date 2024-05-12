@@ -6,7 +6,7 @@ on:
 
 jobs:
   build:
-    name: Prepare
+    name: Build and Publish Process
     runs-on: ubuntu-latest
 
     steps:
