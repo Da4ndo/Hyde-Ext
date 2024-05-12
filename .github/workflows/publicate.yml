@@ -6,21 +6,30 @@ on:
 
 jobs:
   build:
-    name: Build and Publish Process
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
+    - name: Checkout@v4
       uses: actions/checkout@v4
       with:
         ref: main
 
-    - name: Set up Rust
+    - name: Install Rust stable version
       uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
         profile: minimal
         override: true
+
+    - name: Prepare Environment Variables
+      run: |
+        echo "REPO_NAME=${{ github.repository }}" >> $GITHUB_ENV
+        echo "SAFE_REPO_NAME=$(echo $REPO_NAME | sed 's/\//-/g')" >> $GITHUB_ENV
+
+    - name: Echo Variables
+      run: |
+        echo "Repository Name: $REPO_NAME"
+        echo "Safe Repository Name: $SAFE_REPO_NAME"
 
     - name: Build Release
       run: |
@@ -31,18 +40,16 @@ jobs:
     - name: Archive Release Binary
       run: |
         echo ":: Archiving release binary..."
-        REPO_NAME="${{ github.repository }}"
-        SAFE_REPO_NAME="${REPO_NAME/\//-}"
-        tar -czvf ${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz  -C ./ assets -C ./target/release/ hyde-ext
+        tar -czvf $SAFE_REPO_NAME-${{ github.ref_name }}-x86_64.tar.gz -C ./target/release/ hyde-ext
         echo "  -> Archive created successfully."
         ls
 
-    - name: Upload Gzip of Release Binary
+    - name: Upload Release Tarball
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz
-        asset_name: ${SAFE_REPO_NAME}-${{ github.ref_name }}-x86_64.tar.gz
+        asset_path: ./${{ env.SAFE_REPO_NAME }}-${{ github.ref_name }}-x86_64.tar.gz
+        asset_name: ${{ env.SAFE_REPO_NAME }}-${{ github.ref_name }}-x86_64.tar.gz
         asset_content_type: application/gzip
