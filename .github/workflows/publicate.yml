@@ -1,6 +1,4 @@
 name: Publicate new release
-runs:
-  using: 'node20' 
 
 on:
   release:
