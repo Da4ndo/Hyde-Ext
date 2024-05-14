@@ -71,15 +71,26 @@ Post-upgrade, Hyde-Ext facilitates the restoration of custom configurations from
 
 ## 🛠️ Installation
 
-To install Hyde-Ext, utilize the pacman package manager:
+To install Hyde-Ext stable, utilize the pacman package manager:
 
 ```
 yay -S hyde-ext
 ```
 
+To build and use the latest version of Hyde-Ext from the git repository:
+
+```
+yay -S hyde-ext-git
+```
+
+
 ## 🔄 Changelog
 
-- **Patch Release [v1.1.0] - 06/15/2024**:
+- **Patch Release [v1.1.1] - 05/14/2024**:
+  - 🛠️ Updated PKGBUILD for AUR package to ensure compatibility and stability.
+  - 🚀 Added `hyde-ext-git` package for users preferring the cutting-edge version directly from the git repository.
+
+- **Patch Release [v1.1.0] - 05/13/2024**:
   - 🛠️ Fixed an issue where assets files were not correctly handled in release mode.
 
 - **Initial Release [UNPATCHED] [v1.0.7+beta] - 05/12/2024**:
