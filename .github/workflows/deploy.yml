@@ -1,0 +1,200 @@
+name: Deployment
+
+on:
+  push:
+    tags:
+      - '*.*.*'
+
+jobs:
+  test:
+    name: Test
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: true
+      matrix:
+        os:
+          - ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          components: clippy, rustfmt
+          override: true
+          default: true
+
+      - name: Build
+        run: cargo build --locked
+
+      - name: Test
+        run: cargo test
+
+      - name: Check formatting
+        if: runner.os == 'Linux'
+        run: ./fmt.sh
+
+      - name: Clippy check
+        if: runner.os == 'Linux'
+        run: ./clippy.sh
+
+  build_linux:
+    name: Build
+
+    runs-on: ubuntu-latest
+
+  strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
+          target: ${{ matrix.target }}
+          override: true
+          default: true
+
+      - name: Build
+        run: cargo build --target ${{ matrix.target }} --release
+
+      - name: Strip all debug symbols
+        run: strip --strip-all target/${{ matrix.target }}/release/hyde-ext
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hyde-ext-${{ matrix.target }}
+          path: target/${{ matrix.target }}release/hyde-ext
+          if-no-files-found: error
+
+  upload_checksums:
+    name: Upload Checksums
+
+    needs:
+      - test
+      - build_linux
+
+    if: needs.create_release.outputs.is_release == 'true'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./downloads
+
+      - name: Flatten directory
+        run: ./ci/github-actions/expose-release-artifacts.sh
+
+      - name: Create checksums
+        run: ./ci/github-actions/create-checksums.sh
+
+      - name: Upload as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: sha*sum.txt
+
+      - name: Release sha256sum
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./sha256sum.txt
+          asset_name: sha256sum.txt
+          asset_content_type: text/plain
+
+  publish_aur_package:
+    name: Publish AUR package
+
+    needs:
+      - create_release
+      - test
+      - build_linux
+      - upload_release_assets
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: true
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+// FIXME Add assets to upload and also fix checksum
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: checksums
+          path: ./checksums
+
+      - name: Generate PKGBUILD
+        env:
+          TARGET: ${{ matrix.target }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}-${{ github.sha }}
+        run: ./ci/github-actions/generate-pkgbuild.py3
+
+      - name: Publish hyde-ext-git to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2
+        with:
+          pkgname: hyde-ext-git
+          pkgbuild: ./pkgbuild/hyde-ext-git/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: ${{ github.ref_name }}
+          force_push: 'true'
+
+      - name: Publish hyde-ext to the AUR
+        uses: KSXGitHub/github-actions-deploy-aur@v2
+        with:
+          pkgname: hyde-ext
+          pkgbuild: ./pkgbuild/hyde-ext/PKGBUILD
+          commit_username: ${{ secrets.AUR_USERNAME }}
+          commit_email: ${{ secrets.AUR_EMAIL }}
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          commit_message: ${{ github.ref_name }}
+          force_push: 'true'
+
+  publish_cargo_crate:
+    name: Publish Cargo crate
+
+    needs:
+      - create_release
+      - test
+
+    if: needs.create_release.outputs.release_type == 'official'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rs/toolchain@v1.0.6
+        with:
+          profile: minimal
+          override: 'true'
+          default: 'true'
+
+      - name: Login
+        run: cargo login ${{ secrets.CRATE_AUTH_TOKEN }}
+
+      - name: Publish
+        env:
+          RELEASE_TAG: ${{ needs.create_release.outputs.release_tag }}
+        run: ./ci/github-actions/publish-crates.sh

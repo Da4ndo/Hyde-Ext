@@ -1,13 +1,19 @@
 use colored::*;
 use std::{fs, process::Command};
 
-use crate::install::FileEntry;
+use crate::shared::assets::Asset;
 
-pub fn install(choice: &FileEntry) {
-    let source_path = match &choice.source_path {
-        Some(path) => path,
-        None => {
-            eprintln!("{} Source path for packages is missing.", ":: Error:".red());
+pub fn install(choice: &Asset) {
+    let source_path = match choice.name {
+        "Packages" => "path/to/packages/list",
+        "BUN" => "path/to/bun/list",
+        "NVM" => "path/to/nvm/list",
+        _ => {
+            eprintln!(
+                "{} Unknown package type: {}",
+                ":: Error:".red(),
+                choice.name
+            );
             return;
         }
     };

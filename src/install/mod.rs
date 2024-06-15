@@ -1,26 +1,34 @@
-use serde::Deserialize;
+pub mod configs;
+pub mod fastfetch;
+pub mod packages;
+pub mod scripts;
+pub mod ufw;
 
-mod configs;
-mod fastfetch;
-mod packages;
-mod scripts;
-mod ufw;
-pub mod manager;
+use configs::ConfigInstaller;
 
-#[derive(Deserialize, Debug)]
-struct FileConfig {
-    file: Vec<FileEntry>,
-}
-
-#[derive(Deserialize, Debug, Clone)]
-struct FileEntry {
-    title: String,
-    description: String,
-    handler: String,
-    #[serde(default)]
-    default: bool,
-    #[serde(default)]
-    source_path: Option<String>,
-    #[serde(default)]
-    target_path: Option<String>,
-}
+pub const CONFIG_INSTALLERS: &[ConfigInstaller] = &[
+    ConfigInstaller::new(
+        "Hyprland.conf",
+        "Hyprland.conf [CONFIG]",
+        "Configuration for Hyprland, required by auto-layout.sh to manage language settings.",
+        false,
+    ),
+    ConfigInstaller::new(
+        "Monitors.conf",
+        "Monitors.conf [CONFIG]",
+        "Configuration for dual-monitor setup: primary 1920x1080, secondary 2560x1080.",
+        true,
+    ),
+    ConfigInstaller::new(
+        "User-Preferences.conf",
+        "User-Preferences.conf [CONFIG]",
+        "User preferences including screenshot key bindings, swaylock settings, and cursor window rules.",
+        true,
+    ),
+    ConfigInstaller::new(
+        ".zshrc",
+        ".zshrc [CONFIG]",
+        "Shell configuration enhancing productivity with zoxide directory jumping, alias for 'ip -c' as default, fastfetch, and cargo environment setup.",
+        true,
+    ),
+];

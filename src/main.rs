@@ -1,9 +1,17 @@
 use clap::{Command, Arg};
 use std::process;
 use colored::*;
+use lazy_static::lazy_static;
+use std::sync::atomic::{AtomicBool, Ordering};
 
-mod restore;
+mod commands;
+mod shared;
 mod install;
+
+lazy_static! {
+    pub static ref DEBUG: AtomicBool = AtomicBool::new(false);
+    pub static ref FORCE: AtomicBool = AtomicBool::new(false);
+}
 
 fn main() {
     let app = Command::new("hyde-ext")
@@ -40,17 +48,18 @@ fn main() {
         }
         process::exit(1);
     });
+
     if matches.get_flag("debug") {
-        std::env::set_var("DEBUG", "true");
+        DEBUG.store(true, Ordering::SeqCst);
         println!("{} Debug mode is activated.", "::".green());
     }
 
     if matches.get_flag("force") {
-        std::env::set_var("FORCE", "true");
+        FORCE.store(true, Ordering::SeqCst);
         println!("{} Force mode is activated.", "->".green());
     }
 
-    if std::env::var("DEBUG").unwrap_or_default() == "true" {
+    if DEBUG.load(Ordering::SeqCst) {
         if cfg!(debug_assertions) {
             println!("{} Application is running in debug build mode.", ":: Debug:".blue());
         } else {
@@ -62,10 +71,10 @@ fn main() {
 
     match matches.subcommand() {
         Some(("restore", _)) => {
-            restore::restore_configs();
+            commands::restore();
         },
         Some(("install", _)) => {
-            install::manager::install_resources();
+            commands::install();
         }
         _ => {
             println!("{} For command usage, type --help", ":: Info:".bright_blue());

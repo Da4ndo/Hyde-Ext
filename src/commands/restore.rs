@@ -1,15 +1,22 @@
+use crate::DEBUG;
 use colored::*;
-use dialoguer::{theme::ColorfulTheme, Confirm, Select};
+use inquire::ui::{Color, StyleSheet};
+use inquire::{Confirm, Select};
 use std::fs;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
+use std::process;
+use std::sync::atomic::Ordering;
 use walkdir::WalkDir;
 
-pub fn restore_configs() {
+use crate::shared::common::get_render_config;
+
+pub fn start() {
+    let debug = DEBUG.load(Ordering::SeqCst);
     match select_backup_folder() {
         Ok(folder_path) => {
             println!("{} {}", "  -> Selected: ".yellow(), folder_path.display());
-            if let Err(e) = process_backup_folder(&folder_path) {
+            if let Err(e) = handle_backup_folder(&folder_path, debug) {
                 eprintln!("{} {}", ":: Error:".red(), e);
             }
         }
@@ -35,26 +42,32 @@ fn select_backup_folder() -> io::Result<PathBuf> {
         .map(|dir| dir.file_name().to_string_lossy().into_owned())
         .collect();
 
-    let selection = Select::with_theme(&ColorfulTheme::default())
-        .with_prompt(
-            " Choose a backup folder to restore from"
-                .yellow()
-                .to_string(),
+    let selection = Select::new("Select a backup folder to restore from >", folder_names)
+        .with_page_size(10)
+        .with_render_config(
+            get_render_config()
+                .with_selected_option(Some(StyleSheet::new().with_fg(Color::DarkYellow))),
         )
-        .default(0)
-        .items(&folder_names)
-        .interact_opt()
-        .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?
-        .ok_or(io::Error::new(io::ErrorKind::Other, "No selection made"))?;
+        .prompt()
+        .unwrap_or_else(|e| {
+            eprintln!("{} Failed to select options: {}", ":: Error:".red(), e);
+            process::exit(1);
+        });
 
-    Ok(folders[selection].path().to_path_buf())
+    let selected_folder = folders
+        .iter()
+        .find(|entry| entry.file_name().to_string_lossy() == selection)
+        .map(|entry| entry.path().to_path_buf())
+        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Selected folder not found"))?;
+
+    Ok(selected_folder)
 }
 
-fn process_backup_folder(backup_folder: &Path) -> io::Result<()> {
+fn handle_backup_folder(backup_folder: &Path, debug: bool) -> io::Result<()> {
     let home_dir = std::env::var("HOME").unwrap_or_default();
     let config_root = Path::new(&home_dir).join(".config");
-    let skip_extensions = ["png", "jpg", "svg"]; // Define extensions to skip
-    let mut count = 0;
+    let skip_extensions = ["png", "jpg", "svg"];
+    let mut restored_count = 0;
 
     for entry in WalkDir::new(backup_folder)
         .into_iter()
@@ -82,7 +95,7 @@ fn process_backup_folder(backup_folder: &Path) -> io::Result<()> {
         };
 
         if !target_path.exists() {
-            if std::env::var("DEBUG").unwrap_or_default() == "true" {
+            if debug {
                 println!(
                     "{} Skipped: {} exists in backup but not in the production configuration.",
                     ":: Debug:".blue(),
@@ -92,17 +105,16 @@ fn process_backup_folder(backup_folder: &Path) -> io::Result<()> {
             continue;
         }
 
-        match append_custom_configs(entry.path(), &target_path) {
-            Ok(append_success) => {
-                if append_success {
-                    count += 1;
-                    println!(
-                        "{} Successfully restored custom configurations for {}",
-                        "    ->".green(),
-                        entry.path().display()
-                    );
-                }
+        match append_custom_configs(entry.path(), &target_path, debug) {
+            Ok(true) => {
+                restored_count += 1;
+                println!(
+                    "{} Successfully restored custom configurations for {}",
+                    "    ->".green(),
+                    entry.path().display()
+                );
             }
+            Ok(false) => {}
             Err(e) => eprintln!(
                 "{} Failed to process {}: {}",
                 ":: Error:".red(),
@@ -115,14 +127,18 @@ fn process_backup_folder(backup_folder: &Path) -> io::Result<()> {
     println!(
         "\n{} {}\n",
         "Process completed. Total files restored:".yellow(),
-        count
+        restored_count
     );
 
     Ok(())
 }
 
-fn append_custom_configs(source_path: &Path, target_path: &Path) -> Result<bool, io::Error> {
-    if std::env::var("DEBUG").unwrap_or_default() == "true" {
+fn append_custom_configs(
+    source_path: &Path,
+    target_path: &Path,
+    debug: bool,
+) -> Result<bool, io::Error> {
+    if debug {
         println!("{} Processing {}", "    ->".blue(), source_path.display());
     }
 
@@ -149,11 +165,11 @@ fn append_custom_configs(source_path: &Path, target_path: &Path) -> Result<bool,
             "# ================== Customized Configurations Below ===========================",
         ) {
             append = true;
-            skip_next_line = true; // Skip the very next line as it's part of the specific content
+            skip_next_line = true;
             continue;
         }
         if line.contains("Auto-restored by HyDE-Ext") {
-            skip_next_line = true; // Skip the very next line as it's part of the specific content
+            skip_next_line = true;
             continue;
         }
         if append {
@@ -163,7 +179,7 @@ fn append_custom_configs(source_path: &Path, target_path: &Path) -> Result<bool,
     }
 
     if append {
-        if std::env::var("DEBUG").unwrap_or_default() == "true" {
+        if debug {
             println!(
                 "{} Processing source: {}",
                 "    ->".blue(),
@@ -181,10 +197,9 @@ fn append_custom_configs(source_path: &Path, target_path: &Path) -> Result<bool,
         if target_file_content.contains(
             "# ================== Customized Configurations Below ===========================",
         ) {
-            let proceed = Confirm::with_theme(&ColorfulTheme::default())
-                .with_prompt(format!("{} The file '{}' already contains customized configurations. Do you want to continue restoring?", ":: Warning:".yellow(), target_path.file_name().unwrap_or_default().to_string_lossy()))
-                .default(false)
-                .interact()
+            let proceed = Confirm::new(&format!("{} The file '{}' already contains customized configurations. Do you want to continue restoring?", ":: Warning:".yellow(), target_path.file_name().unwrap_or_default().to_string_lossy()))
+                .with_default(false)
+                .prompt()
                 .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
 
             if !proceed {
@@ -199,7 +214,7 @@ fn append_custom_configs(source_path: &Path, target_path: &Path) -> Result<bool,
     }
 
     if !content_to_append.is_empty() {
-        if std::env::var("DEBUG").unwrap_or_default() == "true" {
+        if debug {
             println!(
                 "{} Opening file for restored custom configurations: {}",
                 "    ::".blue(),

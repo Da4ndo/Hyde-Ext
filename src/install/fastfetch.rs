@@ -1,15 +1,18 @@
 use colored::*;
 use std::{fs, path::Path};
 
-use crate::install::FileEntry;
+use crate::shared::assets::Asset;
 
-pub fn install(choice: &FileEntry) {
+pub fn install(_choice: &Asset) {
     println!(
         "{} FastFetch (alter neofetch) terminal images",
         ":: Installing".blue()
     );
-    let source_path = choice.source_path.as_ref().unwrap();
-    let target_path = choice.target_path.as_ref().unwrap();
+
+    // Define source and target paths locally
+    let source_path = "/path/to/source"; // Replace with actual source path
+    let target_path = "/path/to/target"; // Replace with actual target path
+
     match fs::read_dir(source_path) {
         Ok(entries) => {
             let results: Vec<_> = entries

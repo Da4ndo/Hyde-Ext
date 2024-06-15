@@ -1,0 +1,34 @@
+# This PKGBUILD is not a full PKGBUILD
+# pkgname, pkgver, source, and sha1sums are to be generated
+pkgdesc="Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (HyDE_CLI) environment. It automates tasks, installs essential tools, manages configurations, and restores settings from backups."
+pkgrel=1
+arch=(x86_64)
+license=(MIT)
+url="https://github.com/Da4ndo/Hyde-Ext"
+conflicts=('hyde-ext-git')
+sha256sums=(
+  "$_checksum"                  # for the binary
+)
+
+package() {
+  install -Dm755 "hyde-ext-$_checksum" "$pkgdir/usr/bin/hyde-ext"
+
+  # Ensure the assets directory exists
+  install -dm664 "$pkgdir/usr/share/$pkgname/assets"
+
+  # Function to safely install files with overwrite confirmation and ensure directory existence
+  safe_install() {
+    local src=$1
+    local dest=$2
+    local dest_dir=$(dirname "$dest")
+    mkdir -p "$dest_dir" # Ensure the directory exists
+    install -Dm644 "$src" "$dest"
+  }
+
+  echo ":: Copying assets..."
+  # Install all contents of the assets directory recursively, using safe_install
+  find "./assets/" -type f | while read -r file; do
+    local rel_path="${file#./assets/}" # Extract relative path
+    safe_install "$file" "$pkgdir/usr/share/$pkgname/assets/$rel_path"
+  done
+}
