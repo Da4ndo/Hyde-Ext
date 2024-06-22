@@ -6,7 +6,7 @@ use crate::install::{ConfigInstaller, FastFetchInstaller, PackageInstaller, Scri
 pub use loader::load as load;
 
 pub trait Installer {
-    fn instal(&self);
+    fn install(&self);
     fn get_name(&self) -> &str;
     fn get_display(&self) -> &str;
     fn get_description(&self) -> &str;
@@ -16,7 +16,7 @@ pub trait Installer {
 macro_rules! impl_installer {
     ($installer:ty) => {
         impl Installer for $installer {
-            fn instal(&self) {
+            fn install(&self) {
                 self.install()
             }
 

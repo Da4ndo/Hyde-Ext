@@ -20,7 +20,7 @@ impl BunInstaller {
         }
     }
 
-    pub fn install(&mut self) {
+    pub fn install(&self) {
         if self.is_bun_installed() {
             println!(
                 "{} Bun is already installed. Do you want to continue with the installation? (y/n)",
@@ -63,7 +63,7 @@ impl BunInstaller {
         }
     }
 
-    fn is_bun_installed(&mut self) -> bool {
+    fn is_bun_installed(&self) -> bool {
         let output = Command::new("sh")
             .arg("-c")
             .arg("bun --version")
@@ -80,7 +80,6 @@ impl BunInstaller {
                             String::from_utf8_lossy(&output.stdout).trim()
                         );
                     }
-                    self.display = format!("{} [Installed]", self.display);
                     true
                 } else {
                     if crate::DEBUG.load(std::sync::atomic::Ordering::SeqCst) {
@@ -89,7 +88,6 @@ impl BunInstaller {
                             "  :: Debug:".blue()
                         );
                     }
-                    self.display = format!("{} [Partly Installed]", self.display);
                     false
                 }
             }
