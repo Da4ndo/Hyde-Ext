@@ -7,6 +7,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 mod commands;
 mod shared;
 mod install;
+mod meta;
+mod dynamic_path;
 
 lazy_static! {
     pub static ref DEBUG: AtomicBool = AtomicBool::new(false);
@@ -33,7 +35,11 @@ fn main() {
         .subcommand(Command::new("install")
              .about("Installs the specified tool or resource"))
         .subcommand(Command::new("restore")
-             .about("Restores the application to its default state"));
+             .about("Restores the application to its default state")
+             .arg(Arg::new("from")
+                 .long("from")
+                 .value_name("FOLDER")
+                 .help("Specifies the backup folder to restore from (e.g., 'latest' or a specific path)")));
         
 
     let matches = app.clone().try_get_matches().unwrap_or_else(|e| {
@@ -70,8 +76,9 @@ fn main() {
     banner();
 
     match matches.subcommand() {
-        Some(("restore", _)) => {
-            commands::restore();
+        Some(("restore", sub_m)) => {
+            let from = sub_m.get_one::<String>("from").map(|s| s.as_str());
+            commands::restore(from);
         },
         Some(("install", _)) => {
             commands::install();

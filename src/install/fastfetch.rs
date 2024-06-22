@@ -1,48 +1,79 @@
+use crate::shared::common::sanitize_path;
 use colored::*;
+use reqwest::blocking::get;
+use std::io::Write;
 use std::{fs, path::Path};
 
-use crate::shared::assets::Asset;
+#[derive(Clone)]
+pub struct FastFetchInstaller {
+    pub name: String,
+    pub display: String,
+    pub description: String,
+    source_url: String,
+    target_path: String,
+    pub default: bool,
+}
 
-pub fn install(_choice: &Asset) {
-    println!(
-        "{} FastFetch (alter neofetch) terminal images",
-        ":: Installing".blue()
-    );
-
-    // Define source and target paths locally
-    let source_path = "/path/to/source"; // Replace with actual source path
-    let target_path = "/path/to/target"; // Replace with actual target path
-
-    match fs::read_dir(source_path) {
-        Ok(entries) => {
-            let results: Vec<_> = entries
-                .filter_map(Result::ok)
-                .map(|entry| {
-                    let target_file_path = Path::new(target_path).join(entry.file_name());
-                    fs::copy(entry.path(), target_file_path)
-                })
-                .collect();
-
-            if results.iter().all(Result::is_ok) {
-                println!(
-                    "{} copied all images to target path.",
-                    "  -> Successfully ".green()
-                );
-            } else {
-                let errors: Vec<_> = results.into_iter().filter_map(Result::err).collect();
-                for error in errors {
-                    println!("{} Error copying file: {}", "Error:".red(), error);
-                }
-                println!(
-                    "{} Error copying some assets, see above for details.",
-                    "Error:".red()
-                );
+impl FastFetchInstaller {
+    pub fn new(
+        name: String,
+        display: String,
+        description: String,
+        source_url: String,
+        target_path: String,
+        default: bool,
+    ) -> Self {
+        let sanitized_path = match sanitize_path(&target_path) {
+            Ok(path) => path,
+            Err(e) => {
+                println!("{} Error sanitizing path: {}", "Error:".red(), e);
                 std::process::exit(1);
             }
+        };
+
+        FastFetchInstaller {
+            name,
+            display,
+            description,
+            source_url,
+            target_path: sanitized_path,
+            default,
         }
-        Err(e) => {
-            println!("{} Error reading source directory: {}", "Error:".red(), e);
-            std::process::exit(1);
+    }
+
+    pub fn install(&self) {
+        println!(
+            "{} FastFetch (alter neofetch) terminal images",
+            ":: Installing".blue()
+        );
+
+        let urls: Vec<&str> = self.source_url.split('|').collect();
+
+        for url in urls {
+            let response = match get(url) {
+                Ok(resp) => resp,
+                Err(e) => {
+                    println!("{} Error downloading source: {}", "Error:".red(), e);
+                    std::process::exit(1);
+                }
+            };
+
+            let file_name = url.split('/').last().unwrap();
+            let outpath = Path::new(&self.target_path).join(file_name);
+
+            if let Some(p) = outpath.parent() {
+                if !p.exists() {
+                    fs::create_dir_all(p).unwrap();
+                }
+            }
+
+            let mut outfile = fs::File::create(&outpath).unwrap();
+            outfile.write_all(&response.bytes().unwrap()).unwrap();
         }
+
+        println!(
+            "{} copied all images to target path.",
+            "  -> Successfully ".green()
+        );
     }
 }

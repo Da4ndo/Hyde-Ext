@@ -5,26 +5,43 @@ use inquire::{Confirm, Select};
 use std::fs;
 use std::io::{self, BufRead, BufReader, Write};
 use std::path::{Path, PathBuf};
-use std::process;
 use std::sync::atomic::Ordering;
 use walkdir::WalkDir;
 
 use crate::shared::common::get_render_config;
 
-pub fn start() {
+pub fn start(from: Option<&str>) {
     let debug = DEBUG.load(Ordering::SeqCst);
-    match select_backup_folder() {
+
+    let folder_path_result = match from {
+        Some("latest") => select_backup_folder(Some("latest")),
+        Some(path) => {
+            let sanitized_path = Path::new(path).canonicalize().map_err(|e| {
+                io::Error::new(io::ErrorKind::InvalidInput, format!("Invalid path: {}", e))
+            });
+            sanitized_path.and_then(|p| {
+                if p.exists() && p.is_dir() {
+                    Ok(p)
+                } else {
+                    Err(io::Error::new(io::ErrorKind::NotFound, "Provided path does not exist or is not a directory"))
+                }
+            })
+        }
+        None => select_backup_folder(None),
+    };
+
+    match folder_path_result {
         Ok(folder_path) => {
-            println!("{} {}", "  -> Selected: ".yellow(), folder_path.display());
+            println!("{} {}", "  -> Selected:".yellow(), folder_path.display());
             if let Err(e) = handle_backup_folder(&folder_path, debug) {
-                eprintln!("{} {}", ":: Error:".red(), e);
+                eprintln!("{} {}", "[ERROR]:".red(), e.to_string().red());
             }
         }
-        Err(e) => eprintln!("{} {}", ":: Error:".red(), e),
+        Err(e) => eprintln!("\n{} {}", "[ERROR]:".red(), e.to_string().red()),
     }
 }
 
-fn select_backup_folder() -> io::Result<PathBuf> {
+fn select_backup_folder(latest: Option<&str>) -> io::Result<PathBuf> {
     let home_dir = std::env::var("HOME").unwrap_or_default();
     let backup_root = Path::new(&home_dir).join(".config/cfg_backups");
     let mut folders: Vec<_> = WalkDir::new(backup_root)
@@ -36,6 +53,13 @@ fn select_backup_folder() -> io::Result<PathBuf> {
         .collect();
 
     folders.sort_by_key(|dir| std::cmp::Reverse(dir.file_name().to_owned()));
+
+    if latest == Some("latest") {
+        return folders
+            .first()
+            .map(|entry| entry.path().to_path_buf())
+            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "No backup folders found"));
+    }
 
     let folder_names: Vec<String> = folders
         .iter()
@@ -49,10 +73,7 @@ fn select_backup_folder() -> io::Result<PathBuf> {
                 .with_selected_option(Some(StyleSheet::new().with_fg(Color::DarkYellow))),
         )
         .prompt()
-        .unwrap_or_else(|e| {
-            eprintln!("{} Failed to select options: {}", ":: Error:".red(), e);
-            process::exit(1);
-        });
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
 
     let selected_folder = folders
         .iter()
@@ -97,8 +118,8 @@ fn handle_backup_folder(backup_folder: &Path, debug: bool) -> io::Result<()> {
         if !target_path.exists() {
             if debug {
                 println!(
-                    "{} Skipped: {} exists in backup but not in the production configuration.",
-                    ":: Debug:".blue(),
+                    "{} Skipping: {} exists in backup but not in the production configuration.",
+                    "  :: Debug:".blue(),
                     target_path.display()
                 );
             }
@@ -109,18 +130,24 @@ fn handle_backup_folder(backup_folder: &Path, debug: bool) -> io::Result<()> {
             Ok(true) => {
                 restored_count += 1;
                 println!(
-                    "{} Successfully restored custom configurations for {}",
-                    "    ->".green(),
-                    entry.path().display()
+                    "{} Restored: {}",
+                    "  -> OK:".green(),
+                    entry
+                        .path()
+                        .file_name()
+                        .unwrap_or_default()
+                        .to_string_lossy()
                 );
             }
             Ok(false) => {}
-            Err(e) => eprintln!(
-                "{} Failed to process {}: {}",
-                ":: Error:".red(),
-                entry.path().display(),
-                e
-            ),
+            Err(e) => {
+                eprintln!(
+                    "\n{} {}",
+                    "   
+                    [ERROR]:".red(),
+                    e.to_string().red()
+                );
+            }
         }
     }
 
@@ -139,7 +166,11 @@ fn append_custom_configs(
     debug: bool,
 ) -> Result<bool, io::Error> {
     if debug {
-        println!("{} Processing {}", "    ->".blue(), source_path.display());
+        println!(
+            "{} Processing {}",
+            "  :: Debug:".blue(),
+            source_path.display()
+        );
     }
 
     let specific_content = format!(
@@ -182,42 +213,44 @@ fn append_custom_configs(
         if debug {
             println!(
                 "{} Processing source: {}",
-                "    ->".blue(),
+                "  :: Debug:".blue(),
                 source_path.display()
             );
             println!(
                 "{} Targeting path: {}",
-                "    ->".blue(),
+                "  :: Debug:".blue(),
                 target_path.display()
             );
         }
-        println!("{} {}", "    -> Found:".green(), source_path.display());
 
         let target_file_content = fs::read_to_string(target_path)?;
         if target_file_content.contains(
             "# ================== Customized Configurations Below ===========================",
         ) {
-            let proceed = Confirm::new(&format!("{} The file '{}' already contains customized configurations. Do you want to continue restoring?", ":: Warning:".yellow(), target_path.file_name().unwrap_or_default().to_string_lossy()))
-                .with_default(false)
-                .prompt()
-                .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
+            let proceed = Confirm::new(&format!(
+                "{} '{}' already has custom configs. Continue?",
+                "Warning:".yellow(),
+                target_path
+                    .file_name()
+                    .unwrap_or_default()
+                    .to_string_lossy()
+            ))
+            .with_default(false)
+            .prompt()
+            .map_err(|e| io::Error::new(io::ErrorKind::Other, e.to_string()))?;
 
             if !proceed {
-                println!(
-                    "{} file: {}",
-                    "    -> Skipping".blue(),
-                    target_path.display()
-                );
+                println!("{} {}", "  -> Skipping:".blue(), target_path.display());
                 return Ok(false);
             }
+            println!("\n");
         }
     }
-
     if !content_to_append.is_empty() {
         if debug {
             println!(
                 "{} Opening file for restored custom configurations: {}",
-                "    ::".blue(),
+                "  :: Debug:".blue(),
                 target_path.display()
             );
         }

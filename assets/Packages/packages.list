@@ -29,7 +29,6 @@ duf
 fd
 downgrade
 
-
 # ========= Development Tools =========
 cmake
 python-updog

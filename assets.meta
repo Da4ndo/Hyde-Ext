@@ -1,0 +1,88 @@
+{
+    "version": "1.0",
+    "configs": [
+        {
+            "name": "hyprland.conf",
+            "display": "Hyprland.conf [CONFIG]",
+            "description": "Hyprland config for auto-layout.sh language management.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Configs/hyprland.conf",
+            "target_path": "$HOME/.config/hypr/hyprland.conf",
+            "default": false
+        },
+        {
+            "name": "monitors.conf",
+            "display": "Monitors.conf [CONFIG]",
+            "description": "Configuration for dual-monitor setup: primary 1920x1080, secondary 2560x1080.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Configs/monitors.conf",
+            "target_path": "$HOME/.config/hypr/monitors.conf",
+            "default": true
+        },
+        {
+            "name": "userprefs.conf",
+            "display": "UserPrefs.conf [CONFIG]",
+            "description": "User preferences including screen keybinds, swaylock settings, and window rules for Cursor IDE.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Configs/userprefs.conf",
+            "target_path": "$HOME/.config/hypr/userprefs.conf",
+            "default": true
+        },
+        {
+            "name": ".zshrc",
+            "display": ".zshrc [CONFIG]",
+            "description": "Shell configuration including zoxide, alias for 'ip -c', fastfetch, and cargo environment settings.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Configs/.zshrc",
+            "target_path": "$HOME/.zshrc",
+            "default": true
+        },
+        {
+            "name": "FastFetch Images",
+            "display": "Fastfetch Images [IMAGES]",
+            "description": "Adding images to fastfetch (alter of neofetch) terminal",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/aisaka.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/girl.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/Giyu.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/GojoSatoru.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/IforgotHerName.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/Joruicsi.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/KenKaneki.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/loli.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/pochita.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/Ram.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/ryuzaki.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/Sukuna.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/sungjinwoo.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/Tanjiro.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/FastFetch/ZeroTwo.png",
+            "target_path": "$HOME/.config/fastfetch/pngs",
+            "default": true
+        },
+        {
+            "name": "UFW Configuration",
+            "display": "UFW Configuration [UFW]",
+            "description": "UFW setup with permitted ports: 22, 80, 443, 3000, 8000, 9090, 24880.",
+            "default": true
+        },
+        {
+            "name": "Layout Automation Script",
+            "display": "Layout Automation Script [SCRIPT]",
+            "description": "Automatically adjusts keyboard layout based on settings. Requires Hyprland.conf [CONFIG]",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Scripts/auto-layout.sh",
+            "target_path": "$HOME/.config/scripts/auto-layout.sh",
+            "default": true
+        },
+        {
+            "name": "Packages",
+            "display": "General AUR Packages [PACKAGE]",
+            "description": "Installs utilities, tools, and more.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Packages/packages.list",
+            "target_path": "$HOME/.config/packages/packages.list",
+            "default": true
+        },
+        {
+            "name": "BUN",
+            "display": "BUN [TOOL]",
+            "description": "Bun is a fast all-in-one JavaScript runtime.",
+            "default": true
+        },
+        {
+            "name": "NVM",
+            "display": "NVM [PACKAGE]",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/NVM/nvm.package",
+            "description": "Node Version Manager - Manage multiple active Node.js versions.",
+            "default": true
+        },
+        {
+            "name": "Wallpapers",
+            "display": "Wallpapers [WALLPAPERS]",
+            "description": "Collection of wallpapers for desktop customization.",
+            "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Wallpapers/wallpaper1.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Wallpapers/wallpaper2.png|https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Wallpapers/wallpaper3.png",
+            "target_path": "/usr/share/$APP/wallpapers/",
+            "default": true
+        }
+    ]
+}

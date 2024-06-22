@@ -170,31 +170,3 @@ jobs:
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: ${{ github.ref_name }}
           force_push: 'true'
-
-  publish_cargo_crate:
-    name: Publish Cargo crate
-
-    needs:
-      - create_release
-      - test
-
-    if: needs.create_release.outputs.release_type == 'official'
-
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions-rs/toolchain@v1.0.6
-        with:
-          profile: minimal
-          override: 'true'
-          default: 'true'
-
-      - name: Login
-        run: cargo login ${{ secrets.CRATE_AUTH_TOKEN }}
-
-      - name: Publish
-        env:
-          RELEASE_TAG: ${{ needs.create_release.outputs.release_tag }}
-        run: ./ci/github-actions/publish-crates.sh

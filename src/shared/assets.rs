@@ -1,38 +1,4 @@
-#[derive(Clone)]
-pub struct Asset {
-    pub name: &'static str,
-    pub display: &'static str,
-    pub description: &'static str,
-    pub default: bool,
-}
-
 pub const ASSETS: &[Asset] = &[
-    // CONFIGS
-    Asset {
-        name: "Hyprland.conf",
-        display: "Hyprland.conf [CONFIG]",
-        description: "Configuration for Hyprland, required by auto-layout.sh to manage language settings.",
-        default: false,
-    },
-    Asset {
-        name: "Monitors.conf",
-        display: "Monitors.conf [CONFIG]",
-        description: "Configuration for dual-monitor setup: primary {color:blue}1920x1080{/color}, secondary {color:blue}2560x1080{/color}.",
-        default: true,
-    },
-    Asset {
-        name: "User-Preferences.conf",
-        display: "User-Preferences.conf [CONFIG]",
-        description: "User preferences including screenshot key bindings, swaylock settings, and cursor window rules.",
-        default: true,
-    },
-    Asset {
-        name: ".zshrc",
-        display: ".zshrc [CONFIG]",
-        description: "Shell configuration enhancing productivity with {color:blue}zoxide{/color} directory jumping, alias for {color:blue}'ip -c'{/color} as default, {color:blue}fastfetch{/color}, and {color:blue}cargo{/color} environment setup.",
-        default: true,
-    },
-    
     // SCRIPTS
     Asset {
         name: "Layout Automation Script",

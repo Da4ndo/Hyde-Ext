@@ -1,10 +1,13 @@
+use colored::*;
 use inquire::ui::{Attributes, Color, RenderConfig, StyleSheet, Styled};
-
+use crate::DEBUG;
+use std::io::{BufRead, BufReader};
+use std::sync::atomic::Ordering;
 
 pub fn get_render_config() -> RenderConfig<'static> {
     let mut render_config = RenderConfig::default();
     render_config.prompt = StyleSheet::empty().with_fg(Color::DarkYellow);
-    render_config.prompt_prefix = Styled::new("?").with_fg(Color::DarkYellow);
+    render_config.prompt_prefix = Styled::new("?").with_fg(Color::DarkGreen);
     render_config.answered_prompt_prefix = Styled::new(">").with_fg(Color::DarkYellow);
     render_config.highlighted_option_prefix = Styled::new(">").with_fg(Color::DarkYellow);
 
@@ -24,3 +27,35 @@ pub fn get_render_config() -> RenderConfig<'static> {
     render_config
 }
 
+pub fn sanitize_path(path: &str) -> Result<String, String> {
+    let home_dir = match std::env::var("HOME") {
+        Ok(dir) => dir,
+        Err(e) => {
+            let error_message = format!("{} Failed to get HOME directory: {}", "Error:".red(), e.to_string().red());
+            eprintln!("{}", error_message);
+            return Err(error_message);
+        }
+    };
+
+    let cargo_app_name = env!("CARGO_PKG_NAME");
+    let sanitized_path = path.replace("$HOME", &home_dir).replace("$APP", cargo_app_name);
+
+    Ok(sanitized_path)
+}
+
+/// Function to handle and print the output of a command.
+pub fn handle_command_output(mut child: std::process::Child) {
+    if let Some(output) = child.stdout.take() {
+        let reader = BufReader::new(output);
+        for line in reader.lines() {
+            match line {
+                Ok(line) => {
+                    if DEBUG.load(Ordering::SeqCst) {
+                        println!("[COMMAND OUTPUT]: {}", line)
+                    }
+                }
+                Err(e) => eprintln!("{} Error reading command output: {}", ":: Error:".red(), e),
+            }
+        }
+    }
+}
