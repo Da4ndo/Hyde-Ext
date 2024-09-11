@@ -77,6 +77,8 @@ impl WallpaperInstaller {
         );
     }
 
+
+    // TODO fix wallpapers path
     fn create_symlinks(&self, target_path: &str) {
         let home_dir = std::env::var("HOME").unwrap();
         let themes_path = Path::new(&home_dir).join(".config/hyde/themes");

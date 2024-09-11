@@ -186,6 +186,8 @@ fn append_custom_configs(
     let reader = BufReader::new(file);
 
     let mut skip_next_line = false;
+    let mut pokemon_line_commented = false;
+
     for line in reader.lines() {
         let line = line?;
         if skip_next_line {
@@ -204,6 +206,9 @@ fn append_custom_configs(
             continue;
         }
         if append {
+            if line.trim().starts_with('#') && line.contains("pokemon-colorscripts") {
+                pokemon_line_commented = true;
+            }
             content_to_append.push_str(&line);
             content_to_append.push('\n');
         }
@@ -223,7 +228,7 @@ fn append_custom_configs(
             );
         }
 
-        let target_file_content = fs::read_to_string(target_path)?;
+        let mut target_file_content = fs::read_to_string(target_path)?;
         if target_file_content.contains(
             "# ================== Customized Configurations Below ===========================",
         ) {
@@ -245,7 +250,14 @@ fn append_custom_configs(
             }
             println!("\n");
         }
+
+        if pokemon_line_commented && target_path.file_name().unwrap_or_default() == ".zshrc" {
+            let re = regex::Regex::new(r"^(pokemon-colorscripts.*)$").unwrap();
+            target_file_content = re.replace_all(&target_file_content, "# $1").to_string();
+            fs::write(target_path, &target_file_content)?;
+        }
     }
+
     if !content_to_append.is_empty() {
         if debug {
             println!(

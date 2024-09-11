@@ -13,22 +13,20 @@ sha256sums=(
 package() {
   install -Dm755 "hyde-ext-$_checksum" "$pkgdir/usr/bin/hyde-ext"
 
-  # Ensure the assets directory exists
-  install -dm664 "$pkgdir/usr/share/$pkgname/assets"
+  # Install assets.meta file to user's home directory
+  install -Dm644 assets.meta "$pkgdir/etc/skel/assets.meta"
 
-  # Function to safely install files with overwrite confirmation and ensure directory existence
-  safe_install() {
-    local src=$1
-    local dest=$2
-    local dest_dir=$(dirname "$dest")
-    mkdir -p "$dest_dir" # Ensure the directory exists
-    install -Dm644 "$src" "$dest"
-  }
+  # Add a post-upgrade hook to remove the assets directory
+  install -Dm755 /dev/null "$pkgdir/usr/share/libalpm/hooks/99-remove-hyde-ext-assets.hook"
+  cat << EOF > "$pkgdir/usr/share/libalpm/hooks/99-remove-hyde-ext-assets.hook"
+[Trigger]
+Type = Package
+Operation = Upgrade
+Target = hyde-ext
 
-  echo ":: Copying assets..."
-  # Install all contents of the assets directory recursively, using safe_install
-  find "./assets/" -type f | while read -r file; do
-    local rel_path="${file#./assets/}" # Extract relative path
-    safe_install "$file" "$pkgdir/usr/share/$pkgname/assets/$rel_path"
-  done
+[Action]
+Description = Removing old hyde-ext assets directory...
+When = PostTransaction
+Exec = /usr/bin/rm -rf /usr/share/hyde-ext/
+EOF
 }
