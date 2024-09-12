@@ -5,9 +5,8 @@ pkgrel=1
 arch=(x86_64)
 license=(MIT)
 url="https://github.com/Da4ndo/Hyde-Ext"
-conflicts=('hyde-ext-git')
 sha256sums=(
-  "$_checksum"                  # for the binary
+  "$_checksum"
 )
 
 package() {

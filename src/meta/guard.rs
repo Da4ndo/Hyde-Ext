@@ -13,7 +13,7 @@ pub fn validate_checksum(file_path: &Path, version: &str) -> bool {
     hasher.update(&file_content);
     let calculated_hash = hasher.finalize();
 
-    let checksum_file = if cfg!(production) {
+    let checksum_file = if cfg!(debug_assertions) {
         "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/meta.sha256sums"
     } else {
         "./meta.sha256sums"
