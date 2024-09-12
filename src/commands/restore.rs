@@ -90,6 +90,12 @@ fn handle_backup_folder(backup_folder: &Path, debug: bool) -> io::Result<()> {
     let skip_extensions = ["png", "jpg", "svg"];
     let mut restored_count = 0;
 
+    // Handle config.ctl file
+    let config_ctl_path = backup_folder.join(".config/waybar/config.ctl");
+    if config_ctl_path.exists() {
+        handle_config_ctl(&config_ctl_path, &config_root.join("waybar/config.ctl"), debug)?;
+    }
+
     for entry in WalkDir::new(backup_folder)
         .into_iter()
         .filter_map(|e| e.ok())
@@ -157,6 +163,88 @@ fn handle_backup_folder(backup_folder: &Path, debug: bool) -> io::Result<()> {
         restored_count
     );
 
+    Ok(())
+}
+
+fn handle_config_ctl(backup_path: &Path, current_path: &Path, debug: bool) -> io::Result<()> {
+    if debug {
+        println!("{} Processing config.ctl", "  :: Debug:".blue());
+        println!("{} Backup path: {:?}", "  :: Debug:".blue(), backup_path);
+        println!("{} Current path: {:?}", "  :: Debug:".blue(), current_path);
+    }
+
+    let backup_content = fs::read_to_string(backup_path)?;
+    let current_content = fs::read_to_string(current_path)?;
+
+    let active_line = backup_content.lines()
+        .find(|line| line.starts_with('1'))
+        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "No active configuration found in backup config.ctl"))?;
+
+    if debug {
+        println!("{} Active line found: {}", "  :: Debug:".blue(), active_line);
+    }
+
+    let target_config = &active_line[1..];
+    let mut updated_content = String::new();
+    let mut found = false;
+
+    if debug {
+        println!("{} Starting line-by-line processing", "  :: Debug:".blue());
+    }
+
+    for line in current_content.lines() {
+        if &line[1..] == target_config {
+            if debug {
+                println!("{} Found exact matching config: {}", "  :: Debug:".blue(), line);
+            }
+            let updated_line = format!("1{}\n", &line[1..]);
+            if debug {
+                println!("{} Updated line: {}", "  :: Debug:".blue(), updated_line);
+            }
+            updated_content.push_str(&updated_line);
+            found = true;
+        } else {
+            let current_line = format!("0{}\n", &line[1..]);
+            if debug {
+                println!("{} Adding non-matching line: {}", "  :: Debug:".blue(), current_line);
+            }
+            updated_content.push_str(&current_line);
+        }
+    }
+
+    if debug {
+        println!("{} Final updated_content:\n{}", "  :: Debug:".blue(), updated_content);
+    }
+
+    if !found {
+        println!("{} Exact matching configuration not found in current config.ctl", "  :: Warning:".yellow());
+    } else {
+        fs::write(current_path, &updated_content)?;
+        println!("{} Updated config.ctl", "  -> OK:".green());
+        if debug {
+            println!("{} Updated content:\n{}", "  :: Debug:".blue(), updated_content);
+        }
+    }
+
+    // Run Hyde waybar reload
+    println!("{} Running Hyde waybar reload...", "  ->".yellow());
+    match std::process::Command::new("Hyde").args(["waybar", "reload"]).output() {
+        Ok(output) => {
+            if output.status.success() {
+                println!("{} Hyde waybar reload executed successfully", "  -> OK:".green());
+                if debug {
+                    println!("{} Hyde waybar reload output:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stdout));
+                }
+            } else {
+                eprintln!("{} Failed to execute Hyde waybar reload", "  -> Error:".red());
+                if debug {
+                    eprintln!("{} Hyde waybar reload error:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stderr));
+                }
+            }
+        },
+        Err(e) => eprintln!("{} Failed to execute Hyde waybar reload: {}", "  -> Error:".red(), e),
+    }
+    
     Ok(())
 }
 
