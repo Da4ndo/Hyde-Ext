@@ -187,6 +187,7 @@ fn handle_config_ctl(backup_path: &Path, current_path: &Path, debug: bool) -> io
     let target_config = &active_line[1..];
     let mut updated_content = String::new();
     let mut found = false;
+    let mut already_enabled = false;
 
     if debug {
         println!("{} Starting line-by-line processing", "  :: Debug:".blue());
@@ -194,6 +195,12 @@ fn handle_config_ctl(backup_path: &Path, current_path: &Path, debug: bool) -> io
 
     for line in current_content.lines() {
         if &line[1..] == target_config {
+            if line.starts_with('1') {
+                already_enabled = true;
+                if debug {
+                    println!("{} Configuration already enabled: {}", "  :: Debug:".blue(), line);
+                }
+            }
             if debug {
                 println!("{} Found exact matching config: {}", "  :: Debug:".blue(), line);
             }
@@ -217,32 +224,34 @@ fn handle_config_ctl(backup_path: &Path, current_path: &Path, debug: bool) -> io
     }
 
     if !found {
-        println!("{} Exact matching configuration not found in current config.ctl", "  :: Warning:".yellow());
-    } else {
+        println!("{} Waybar: Exact matching configuration not found in current config.ctl", "  :: Warning:".yellow());
+    } else if !already_enabled {
         fs::write(current_path, &updated_content)?;
         println!("{} Updated config.ctl", "  -> OK:".green());
         if debug {
             println!("{} Updated content:\n{}", "  :: Debug:".blue(), updated_content);
         }
-    }
 
-    // Run Hyde waybar reload
-    println!("{} Running Hyde waybar reload...", "  ->".yellow());
-    match std::process::Command::new("Hyde").args(["waybar", "reload"]).output() {
-        Ok(output) => {
-            if output.status.success() {
-                println!("{} Hyde waybar reload executed successfully", "  -> OK:".green());
-                if debug {
-                    println!("{} Hyde waybar reload output:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stdout));
+        // Run Hyde waybar reload
+        println!("{} Running Hyde waybar reload...", "  ->".yellow());
+        match std::process::Command::new("Hyde").args(["waybar", "reload"]).output() {
+            Ok(output) => {
+                if output.status.success() {
+                    println!("{} Hyde waybar reload executed successfully", "  -> OK:".green());
+                    if debug {
+                        println!("{} Hyde waybar reload output:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stdout));
+                    }
+                } else {
+                    eprintln!("{} Failed to execute Hyde waybar reload", "  -> Error:".red());
+                    if debug {
+                        eprintln!("{} Hyde waybar reload error:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stderr));
+                    }
                 }
-            } else {
-                eprintln!("{} Failed to execute Hyde waybar reload", "  -> Error:".red());
-                if debug {
-                    eprintln!("{} Hyde waybar reload error:\n{}", "  :: Debug:".blue(), String::from_utf8_lossy(&output.stderr));
-                }
-            }
-        },
-        Err(e) => eprintln!("{} Failed to execute Hyde waybar reload: {}", "  -> Error:".red(), e),
+            },
+            Err(e) => eprintln!("{} Failed to execute Hyde waybar reload: {}", "  -> Error:".red(), e),
+        }
+    } else {
+        println!("{} Waybar: Configuration already in use, no changes needed", "  -> Info:".blue());
     }
     
     Ok(())
