@@ -251,7 +251,7 @@ fn handle_config_ctl(backup_path: &Path, current_path: &Path, debug: bool) -> io
             Err(e) => eprintln!("{} Failed to execute Hyde waybar reload: {}", "  -> Error:".red(), e),
         }
     } else {
-        println!("{} Waybar: Configuration already in use, no changes needed", "  -> Info:".blue());
+        println!("{} Waybar: Configuration already in use, no changes needed", "  -> INFO:".bright_blue());
     }
     
     Ok(())
@@ -291,6 +291,9 @@ fn append_custom_configs(
             skip_next_line = false;
             continue;
         }
+        if line.trim().starts_with('#') && line.contains("pokemon-colorscripts") {
+            pokemon_line_commented = true;
+        }
         if line.contains(
             "# ================== Customized Configurations Below ===========================",
         ) {
@@ -303,9 +306,6 @@ fn append_custom_configs(
             continue;
         }
         if append {
-            if line.trim().starts_with('#') && line.contains("pokemon-colorscripts") {
-                pokemon_line_commented = true;
-            }
             content_to_append.push_str(&line);
             content_to_append.push('\n');
         }
@@ -330,7 +330,7 @@ fn append_custom_configs(
             "# ================== Customized Configurations Below ===========================",
         ) {
             let proceed = Confirm::new(&format!(
-                "{} '{}' already has custom configs. Continue?",
+                "{} '{}' already has custom configs. They will be replaced. Continue?",
                 "Warning:".yellow(),
                 target_path
                     .file_name()
@@ -346,42 +346,44 @@ fn append_custom_configs(
                 return Ok(false);
             }
             println!("\n");
+
+            // Replace existing custom configuration or append to the end
+            if let Some(custom_config_start) = target_file_content.find(
+                "# ================== Customized Configurations Below ===========================",
+            ) {
+                target_file_content.truncate(custom_config_start);
+            }
         }
 
         if pokemon_line_commented && target_path.file_name().unwrap_or_default() == ".zshrc" {
             let re = regex::Regex::new(r"^(pokemon-colorscripts.*)$").unwrap();
-            target_file_content = re.replace_all(&target_file_content, "# $1").to_string();
+            target_file_content = re.replace_all(&target_file_content, |caps: &regex::Captures| {
+                format!("# {}", &caps[1])
+            }).to_string();
             fs::write(target_path, &target_file_content)?;
-        }
-    }
-
-    if !content_to_append.is_empty() {
-        if debug {
-            println!(
-                "{} Opening file for restored custom configurations: {}",
-                "  :: Debug:".blue(),
-                target_path.display()
-            );
+            println!("{} Pokemon-colorscripts line detected and commented out in .zshrc", "  -> INFO:".bright_blue());
         }
 
-        let mut target_file = fs::OpenOptions::new().append(true).open(target_path)?;
+        if !content_to_append.is_empty() {
+            if debug {
+                println!(
+                    "{} Replacing/adding custom configurations in: {}",
+                    "  :: Debug:".blue(),
+                    target_path.display()
+                );
+            }
 
-        writeln!(target_file)?;
-        writeln!(target_file)?;
+            // Remove the last line of target_file_content
+            target_file_content = target_file_content.trim_end().lines().collect::<Vec<&str>>().split_last().map(|(_, rest)| rest.join("\n")).unwrap_or_default();
+            target_file_content.push_str("\n\n");
+            target_file_content.push_str(&specific_content);
+            target_file_content.push('\n');
+            target_file_content.push_str(&content_to_append);
 
-        writeln!(target_file, "{}", specific_content)?;
-        writeln!(
-            target_file,
-            "#                      Auto-restored by HyDE-Ext"
-        )?;
-        writeln!(
-            target_file,
-            "# =============================================================================="
-        )?;
+            fs::write(target_path, target_file_content)?;
 
-        writeln!(target_file, "{}", content_to_append)?;
-
-        return Ok(true);
+            return Ok(true);
+        }
     }
 
     Ok(false)
