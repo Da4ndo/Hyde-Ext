@@ -3,7 +3,7 @@ use colored::*;
 use inquire::ui::{Color, StyleSheet};
 use inquire::{Confirm, Select};
 use std::fs;
-use std::io::{self, BufRead, BufReader, Write};
+use std::io::{self, BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::sync::atomic::Ordering;
 use walkdir::WalkDir;

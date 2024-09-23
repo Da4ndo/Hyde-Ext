@@ -2,12 +2,14 @@
 ![GitHub forks](https://img.shields.io/github/forks/Da4ndo/Hyde-Ext?style=social)
 ![GitHub contributors](https://img.shields.io/github/contributors/Da4ndo/Hyde-Ext)
 ![GitHub last commit](https://img.shields.io/github/last-commit/Da4ndo/Hyde-Ext)
+![GitHub license](https://img.shields.io/github/license/Da4ndo/Hyde-Ext)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Da4ndo/Hyde-Ext)
 
 <div align="center">
 
 ![hyde_banner](https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/imgs/hyde-ext_banner.png)
 
-# Hyde-Ext Project
+# Hyde-Ext: Elevate Your HyDE Experience
 
 Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (HyDE_CLI) environment. It automates tasks, installs essential tools, manages configurations, and restores settings from backups.
 
@@ -22,69 +24,74 @@ Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (
 </div>
 <br><br>
 
-## 🌟 Features
+## 🌟 Key Features
 
-<table>
-<tr>
-<td>
+<div align="center">
 
-### Installation
+| Installation | Restoration |
+|:------------:|:-----------:|
+| <img src="https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd1.png" width="400"> | <img src="https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd2.png" width="400"> |
+| Hyde-Ext streamlines setup with:<br>• Custom configurations<br>• Optional images and scripts<br>• Key packages (`zoxide`, `docker`, etc.)<br>• `swayidle` for idle management<br>• `ufw` for firewall security | Facilitates restoration of custom configs from backups,<br>ensuring personalized settings persist across HyDE updates |
 
-Hyde-Ext streamlines the setup by installing:
+</div>
 
-- Custom configurations for ease of use
-- Optional images and scripts
-- Key packages from `packages.list` such as:
-    - `zoxide`
-    - `docker`
-    - `ttf-nerd-fonts-symbols`
-    - `appimagelauncher`
-    - `fd` (fast search tool)
-- `swayidle` for idle management
-- `ufw` for firewall security
+### 🛠️ Customizable Installation
 
-> [!NOTE]
-> Every option listed in the installation process is optional and can be customized according to user preferences.
+Hyde-Ext offers a flexible installation process:
 
-</td>
-<td>
+- **Configurations**: Tailored for optimal user experience
+- **Assets**: Optional images and scripts to enhance your environment
+- **Essential Packages**: Curated selection from `packages.list`
+  - `zoxide`: Smarter cd command
+  - `docker`: Containerization platform
+  - `ttf-nerd-fonts-symbols`: Icon-rich font
+  - `appimagelauncher`: AppImage management
+  - `fd`: Fast and user-friendly search tool
+- **System Utilities**:
+  - `swayidle`: Efficient idle management
+  - `ufw`: Uncomplicated Firewall for enhanced security
 
-![cmd1](https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd1.png)
+> [!TIP]
+> Every installation option is customizable to fit your unique preferences and workflow.
 
-</td>
-</tr>
-<tr>
-<td>
+### 🔄 Seamless Restoration
 
-### Restoration
-Post-upgrade, Hyde-Ext facilitates the restoration of custom configurations from backups, allowing users to maintain their personalized settings while staying current with the latest HyDE updates.
+After upgrading, Hyde-Ext ensures your environment remains familiar:
 
-</td>
-<td>
+- Restores custom configurations from backups
+- Preserves your personalized settings
+- Keeps you up-to-date with the latest HyDE features
 
-![cmd2](https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd2.png)
-
-</td>
-</tr>
-</table>
-
+Experience the perfect blend of freshness and familiarity with Hyde-Ext's restoration capabilities.
 
 ## 🛠️ Installation
 
-To install Hyde-Ext stable, utilize the pacman package manager:
+To install Hyde-Ext stable, utilize the the package manager:
 
 ```
 yay -S hyde-ext
 ```
 
-To build and use the latest version of Hyde-Ext from the git repository:
-
-```
-yay -S hyde-ext-git
-```
-
-
 ## 🔄 Changelog
+
+- **Patch Release [v1.2.0] - [Current Date]**:
+  - 🔧 Refactored codebase for improved structure and maintainability
+    - Reorganized modules and file structure
+    - Implemented new `commands` module for better separation of concerns
+  - 🚀 Enhanced installation process
+    - Added new `ConfigInstaller` for more flexible configuration handling
+    - Improved asset management with new `Asset` struct
+  - 🖥️ Updated GitHub Actions workflow
+    - Implemented new deployment process for stable versions
+    - Added checksums generation for release artifacts
+  - 🎨 Updated wallpapers and images
+  - 🔒 Removed UFW configuration from default setup
+  - 🧰 Added new development tools
+    - Integrated `inquire` for improved user prompts
+    - Implemented `lazy_static` for better performance
+  - 📦 Updated dependencies
+    - Added `reqwest` for HTTP requests
+  - 🐛 Various bug fixes and performance improvements
 
 - **Patch Release [v1.1.1] - 05/14/2024**:
   - 🛠️ Updated PKGBUILD for AUR package to ensure compatibility and stability.

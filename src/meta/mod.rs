@@ -1,9 +1,12 @@
-mod loader;
 mod guard;
+mod loader;
 
-use crate::install::{ConfigInstaller, FastFetchInstaller, PackageInstaller, ScriptInstaller, UfwInstaller, BunInstaller, WallpaperInstaller};
+use crate::install::{
+    BunInstaller, ConfigInstaller, FastFetchInstaller, PackageInstaller, ScriptInstaller,
+    UfwInstaller, WallpaperInstaller,
+};
 
-pub use loader::load as load;
+pub use loader::load;
 
 pub trait Installer {
     fn install(&self);
@@ -11,6 +14,7 @@ pub trait Installer {
     fn get_display(&self) -> &str;
     fn get_description(&self) -> &str;
     fn is_default(&self) -> bool;
+    fn is_disabled(&self) -> bool;
 }
 
 macro_rules! impl_installer {
@@ -35,6 +39,10 @@ macro_rules! impl_installer {
             fn is_default(&self) -> bool {
                 self.default
             }
+
+            fn is_disabled(&self) -> bool {
+                false
+            }
         }
     };
 }
@@ -45,8 +53,30 @@ impl_installer!(PackageInstaller);
 impl_installer!(ScriptInstaller);
 impl_installer!(UfwInstaller);
 impl_installer!(BunInstaller);
-impl_installer!(WallpaperInstaller);
 
+impl Installer for WallpaperInstaller {
+    fn install(&self) {
+        self.install()
+    }
 
+    fn get_name(&self) -> &str {
+        self.name.as_str()
+    }
 
+    fn get_display(&self) -> &str {
+        self.display.as_str()
+    }
 
+    fn get_description(&self) -> &str {
+        self.description.as_str()
+    }
+
+    fn is_default(&self) -> bool {
+        self.default
+    }
+
+    fn is_disabled(&self) -> bool {
+        self.disabled
+    }
+
+}

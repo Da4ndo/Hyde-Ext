@@ -12,6 +12,7 @@ pub struct WallpaperInstaller {
     source_url: String,
     target_path: String,
     pub default: bool,
+    pub disabled: bool,
 }
 
 impl WallpaperInstaller {
@@ -22,6 +23,7 @@ impl WallpaperInstaller {
         source_url: String,
         target_path: String,
         default: bool,
+        disabled: bool,
     ) -> Self {
         let sanitized_path = match sanitize_path(&target_path) {
             Ok(path) => path,
@@ -38,6 +40,7 @@ impl WallpaperInstaller {
             source_url,
             target_path: sanitized_path,
             default,
+            disabled,
         }
     }
 
@@ -76,7 +79,6 @@ impl WallpaperInstaller {
             "  -> Successfully ".green()
         );
     }
-
 
     // TODO fix wallpapers path
     fn create_symlinks(&self, target_path: &str) {

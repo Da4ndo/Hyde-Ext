@@ -23,6 +23,7 @@ struct Config {
     source_url: Option<String>,
     default: bool,
     target_path: Option<String>,
+    disabled: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -35,12 +36,12 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
     let meta_file = dynamic_path::get("assets.meta");
 
     let meta_content = fs::read_to_string(&meta_file).unwrap_or_else(|e| {
-        eprintln!("{} {}", "[ERROR]:".red(), e.to_string().red());
+        eprintln!("{} {}: {}", "[ERROR: Meta File Read]".red(), "Failed to read meta file".red(), e.to_string().red());
         std::process::exit(1);
     });
 
     let assets_meta: AssetsMeta = serde_json::from_str(&meta_content).unwrap_or_else(|e| {
-        eprintln!("{} {}", "[ERROR]:".red(), e.to_string().red());
+        eprintln!("{} {}: {}", "[ERROR: Meta File Parse]".red(), "Failed to parse meta file".red(), e.to_string().red());
         std::process::exit(1);
     });
 
@@ -53,7 +54,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
         .with_default(false)
         .prompt()
         .unwrap_or_else(|e| {
-            eprintln!("\n{} {}", "[ERROR]:".red(), e.to_string().red());
+            eprintln!("\n{} {}: {}", "[ERROR: Checksum Confirmation]".red(), "Failed to prompt for confirmation".red(), e.to_string().red());
             std::process::exit(1);
         });
         if !proceed {
@@ -114,6 +115,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     source_url,
                     target_path,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("BUN") => Some(Arc::new(BunInstaller::new(
                     conf.name,
@@ -122,7 +124,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     conf.default,
                 )) as Arc<dyn Installer + Send + Sync>),
                 _ => {
-                    eprintln!("\n{} No handler found for the provided meta:", "[ERROR]:".red());
+                    eprintln!("\n{} No handler found for the provided meta:", "[ERROR: Unknown Installer Type]".red());
                     eprintln!("    Name: {}", conf.name.red());
                     eprintln!("    Source URL: {}", source_url.red());
                     eprintln!("    Display: {}", conf.display.red());
@@ -132,4 +134,3 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
         })
         .collect()
 }
-
