@@ -15,7 +15,7 @@
             "description": "User preferences including screen keybinds, swaylock settings, and window rules for Cursor IDE.",
             "source_url": "https://raw.githubusercontent.com/Da4ndo/Hyde-Ext/main/assets/Configs/userprefs.conf",
             "target_path": "$HOME/.config/hypr/userprefs.conf",
-            "default": true,
+            "default": true
         },
         {
             "name": ".zshrc",
