@@ -34,30 +34,26 @@ fn select_installers() -> Vec<Arc<dyn Installer + Send + Sync>> {
         Cell::from("Description").fg(comfy_table::Color::Yellow)
     ]));
 
-    let (display_texts, default_indices): (Vec<&str>, Vec<usize>) =
-        INSTALLERS.iter().enumerate().fold(
-            (Vec::new(), Vec::new()),
-            |(mut texts, mut indices), (index, installer)| {
-                if installer.is_disabled() {
-                    table.add_row(Row::from(vec![
-                        Cell::from(format!("{} {}", installer.get_name(), "(Not available)")).fg(comfy_table::Color::DarkGrey),
-                        Cell::from(installer.get_description()).fg(comfy_table::Color::DarkGrey)
-                    ]));
+    let mut display_texts = Vec::new();
+    let mut default_indices = Vec::new();
 
-                    return (texts, indices);
-                }
-                texts.push(installer.get_display());
-                if installer.is_default() {
-                    indices.push(index);
-                }
-                table.add_row(Row::from(vec![
-                    Cell::from(installer.get_name()),
-                    Cell::from(installer.get_description())
-                ]));
-
-                (texts, indices)
-            },
-        );
+    for installer in INSTALLERS.iter() {
+        if installer.is_disabled() {
+            table.add_row(Row::from(vec![
+                Cell::from(format!("{} {}", installer.get_name(), "(Not available)")).fg(comfy_table::Color::DarkGrey),
+                Cell::from(installer.get_description()).fg(comfy_table::Color::DarkGrey)
+            ]));
+        } else {
+            table.add_row(Row::from(vec![
+                Cell::from(installer.get_name()),
+                Cell::from(installer.get_description())
+            ]));
+            display_texts.push(installer.get_display());
+            if installer.is_default() {
+                default_indices.push(display_texts.len() - 1);
+            }
+        }
+    }
 
     println!("{}", table);
     println!();
@@ -74,7 +70,7 @@ fn select_installers() -> Vec<Arc<dyn Installer + Send + Sync>> {
 
     INSTALLERS
         .iter()
-        .filter(|installer| selections.contains(&installer.get_display()))
+        .filter(|installer| !installer.is_disabled() && selections.contains(&installer.get_display()))
         .cloned()
         .collect()
 }
