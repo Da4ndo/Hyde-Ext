@@ -78,6 +78,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     source_url,
                     target_path,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("[IMAGES]") => Some(Arc::new(FastFetchInstaller::new(
                     conf.name,
@@ -86,6 +87,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     source_url,
                     target_path,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("[PACKAGE]") => Some(Arc::new(PackageInstaller::new(
                     conf.name,
@@ -93,6 +95,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     conf.description,
                     source_url,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("[SCRIPT]") => Some(Arc::new(ScriptInstaller::new(
                     conf.name,
@@ -101,12 +104,14 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     source_url,
                     target_path,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("[UFW]") => Some(Arc::new(UfwInstaller::new(
                     conf.name,
                     conf.display,
                     conf.description,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 display if display.contains("[WALLPAPERS]") => Some(Arc::new(WallpaperInstaller::new(
                     conf.name,
@@ -122,6 +127,7 @@ pub fn load() -> Vec<Arc<dyn Installer + Send + Sync>> {
                     conf.display,
                     conf.description,
                     conf.default,
+                    conf.disabled.unwrap_or(false),
                 )) as Arc<dyn Installer + Send + Sync>),
                 _ => {
                     eprintln!("\n{} No handler found for the provided meta:", "[ERROR: Unknown Installer Type]".red());

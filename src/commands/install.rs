@@ -10,8 +10,6 @@ use crate::meta::Installer;
 use crate::shared::common::get_render_config;
 use crate::DEBUG;
 
-// TODO Disable wallpapers, add disable option, and set true in assets.meta
-
 pub fn start() {
     let selected_installers = select_installers();
     for choice in selected_installers {

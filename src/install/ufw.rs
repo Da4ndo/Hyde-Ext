@@ -8,15 +8,23 @@ pub struct UfwInstaller {
     pub display: String,
     pub description: String,
     pub default: bool,
+    pub disabled: bool,
 }
 
 impl UfwInstaller {
-    pub fn new(name: String, display: String, description: String, default: bool) -> Self {
+    pub fn new(
+        name: String,
+        display: String,
+        description: String,
+        default: bool,
+        disabled: bool,
+    ) -> Self {
         UfwInstaller {
             name,
             display,
             description,
             default,
+            disabled,
         }
     }
 

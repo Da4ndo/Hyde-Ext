@@ -41,7 +41,7 @@ macro_rules! impl_installer {
             }
 
             fn is_disabled(&self) -> bool {
-                false
+                self.disabled
             }
         }
     };
@@ -53,30 +53,4 @@ impl_installer!(PackageInstaller);
 impl_installer!(ScriptInstaller);
 impl_installer!(UfwInstaller);
 impl_installer!(BunInstaller);
-
-impl Installer for WallpaperInstaller {
-    fn install(&self) {
-        self.install()
-    }
-
-    fn get_name(&self) -> &str {
-        self.name.as_str()
-    }
-
-    fn get_display(&self) -> &str {
-        self.display.as_str()
-    }
-
-    fn get_description(&self) -> &str {
-        self.description.as_str()
-    }
-
-    fn is_default(&self) -> bool {
-        self.default
-    }
-
-    fn is_disabled(&self) -> bool {
-        self.disabled
-    }
-
-}
+impl_installer!(WallpaperInstaller);

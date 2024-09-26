@@ -11,7 +11,7 @@
 
 # Hyde-Ext: Elevate Your HyDE Experience
 
-Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (HyDE_CLI) environment. It automates tasks, installs essential tools, manages configurations, and restores settings from backups.
+Hyde-Ext is a Rust-based command-line application designed to enhance the [HyDE (HyDE_CLI)](https://github.com/HyDE-Project/Hyde-cli) environment, which is built upon the [Hyprdots](https://github.com/prasanthrangan/hyprdots) project. Hyde-Ext automates tasks, installs essential tools, manages configurations, and restores settings from backups, providing a seamless extension to the HyDE ecosystem.
 
 <br>
 
@@ -31,7 +31,7 @@ Hyde-Ext is a Rust-based command-line application designed to enhance the HyDE (
 | Installation | Restoration |
 |:------------:|:-----------:|
 | <img src="https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd1.png" width="400"> | <img src="https://github.com/Da4ndo/Hyde-Ext/blob/main/imgs/cmd2.png" width="400"> |
-| Hyde-Ext streamlines setup with:<br>• Custom configurations<br>• Optional images and scripts<br>• Key packages (`zoxide`, `docker`, etc.)<br>• `swayidle` for idle management<br>• `ufw` for firewall security | Facilitates restoration of custom configs from backups,<br>ensuring personalized settings persist across HyDE updates |
+| Hyde-Ext streamlines setup with:<br>• Custom configurations<br>• Optional images and scripts<br>• `swayidle` for idle management<br>• `ufw` for firewall security<br>• Key packages (`zoxide`, `docker`, etc.) | Facilitates restoration of custom configs from backups,<br>ensuring personalized settings persist across HyDE updates |
 
 </div>
 
@@ -72,9 +72,35 @@ To install Hyde-Ext stable, utilize the the package manager:
 yay -S hyde-ext
 ```
 
+## 🚀 How to Use
+
+To use Hyde-Ext, you have two main commands:
+
+1. For installation:
+   ```
+   hyde-ext install
+   ```
+   This command initiates the installation process, allowing you to customize your HyDE environment with configurations, assets, and essential packages.
+
+2. For restoration:
+   ```
+   hyde-ext restore
+   ```
+   Use this command after upgrading HyDE to restore your custom configurations and settings from backups.
+
+### Additional Information
+
+- Both commands offer interactive prompts to guide you through the process
+- You can customize your installation or restoration based on your preferences
+- Use the `--help` flag with either command for more detailed options
+
+> [!TIP]
+> Always ensure you have a recent backup before running the restore command to prevent any potential data loss.
+
+
 ## 🔄 Changelog
 
-- **Patch Release [v1.2.0] - [Current Date]**:
+- **Patch Release [v1.2.7] - [09/23/2024]**:
   - 🔧 Refactored codebase for improved structure and maintainability
     - Reorganized modules and file structure
     - Implemented new `commands` module for better separation of concerns
@@ -84,14 +110,16 @@ yay -S hyde-ext
   - 🖥️ Updated GitHub Actions workflow
     - Implemented new deployment process for stable versions
     - Added checksums generation for release artifacts
-  - 🎨 Updated wallpapers and images
+  - 🎨 Updated wallpapers and images (disabled for now)
   - 🔒 Removed UFW configuration from default setup
   - 🧰 Added new development tools
     - Integrated `inquire` for improved user prompts
     - Implemented `lazy_static` for better performance
   - 📦 Updated dependencies
     - Added `reqwest` for HTTP requests
+    - Replaced `prettytable-rs` with `comfy-table` for better aesthetics
   - 🐛 Various bug fixes and performance improvements
+  - 🗂️ Added `disabled` key into meta for better asset management
 
 - **Patch Release [v1.1.1] - 05/14/2024**:
   - 🛠️ Updated PKGBUILD for AUR package to ensure compatibility and stability.

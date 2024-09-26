@@ -13,6 +13,7 @@ pub struct ConfigInstaller {
     source_url: String,
     target_path: String,
     pub default: bool,
+    pub disabled: bool
 }
 
 impl ConfigInstaller {
@@ -23,6 +24,7 @@ impl ConfigInstaller {
         source_url: String,
         target_path: String,
         default: bool,
+        disabled: bool
     ) -> Self {
         let sanitized_path = match sanitize_path(&target_path) {
             Ok(path) => path,
@@ -39,6 +41,7 @@ impl ConfigInstaller {
             source_url,
             target_path: sanitized_path,
             default,
+            disabled
         }
     }
 

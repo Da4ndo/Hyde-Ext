@@ -17,6 +17,7 @@ pub struct ScriptInstaller {
     source_url: String,
     target_dir: String,
     pub default: bool,
+    pub disabled: bool
 }
 
 impl ScriptInstaller {
@@ -27,6 +28,7 @@ impl ScriptInstaller {
         source_url: String,
         target_dir: String,
         default: bool,
+        disabled: bool
     ) -> Self {
         ScriptInstaller {
             name,
@@ -35,6 +37,7 @@ impl ScriptInstaller {
             source_url,
             target_dir,
             default,
+            disabled
         }
     }
 

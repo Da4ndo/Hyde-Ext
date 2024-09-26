@@ -8,15 +8,17 @@ pub struct BunInstaller {
     pub display: String,
     pub description: String,
     pub default: bool,
+    pub disabled: bool
 }
 
 impl BunInstaller {
-    pub fn new(name: String, display: String, description: String, default: bool) -> Self {
+    pub fn new(name: String, display: String, description: String, default: bool, disabled: bool) -> Self {
         BunInstaller {
             name,
             display,
             description,
             default,
+            disabled    
         }
     }
 

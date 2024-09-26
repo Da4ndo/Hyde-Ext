@@ -8,6 +8,7 @@ pub struct PackageInstaller {
     pub description: String,
     source_url: String,
     pub default: bool,
+    pub disabled: bool
 }
 
 impl PackageInstaller {
@@ -17,6 +18,7 @@ impl PackageInstaller {
         description: String,
         source_url: String,
         default: bool,
+        disabled: bool
     ) -> Self {
         PackageInstaller {
             name,
@@ -24,6 +26,7 @@ impl PackageInstaller {
             description,
             source_url,
             default,
+            disabled
         }
     }
 
