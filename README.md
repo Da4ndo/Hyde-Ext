@@ -100,7 +100,7 @@ To use Hyde-Ext, you have two main commands:
 
 ## 🔄 Changelog
 
-- **Patch Release [v1.2.7] - [09/23/2024]**:
+- **Patch Release [v1.2.8] - [09/26/2024]**:
   - 🔧 Refactored codebase for improved structure and maintainability
     - Reorganized modules and file structure
     - Implemented new `commands` module for better separation of concerns
