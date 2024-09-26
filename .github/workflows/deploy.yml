@@ -36,12 +36,23 @@ jobs:
     - uses: actions/checkout@v3
     - name: Get release version
       id: get_version
-      run: echo ::set-output name=VERSION::${GITHUB_REF#refs/tags/}
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
     - name: Update PKGBUILD
       run: |
         sed -i "s/pkgver=.*/pkgver=${{ steps.get_version.outputs.VERSION }}/" template/hyde-ext/PKGBUILD
-        sed -i "s/source=.*/source=(\"${{ github.event.release.assets[0].browser_download_url }}\")/" template/hyde-ext/PKGBUILD
-        sha256sum=$(curl -sL ${{ github.event.release.assets[0].browser_download_url }} | sha256sum | cut -d ' ' -f 1)
+        ::log::info "Fetching release assets"
+        assets_url=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
+          jq -r '.assets[0].browser_download_url')
+        -> "Assets URL: $assets_url"
+        if [ -z "$assets_url" ]; then
+          ::error "Failed to fetch assets URL"
+          exit 1
+        fi
+        sed -i "s|source=.*|source=(\"$assets_url\")|" template/hyde-ext/PKGBUILD
+        ::log::info "Downloading asset for SHA256 calculation"
+        sha256sum=$(curl -sL "$assets_url" | sha256sum | cut -d ' ' -f 1)
+        -> "SHA256: $sha256sum"
         sed -i "s/sha256sums=.*/sha256sums=('$sha256sum')/" template/hyde-ext/PKGBUILD
     - name: Publish AUR package
       uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
@@ -52,3 +63,4 @@ jobs:
         commit_email: ${{ secrets.AUR_EMAIL }}
         ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
         commit_message: "Update to version ${{ steps.get_version.outputs.VERSION }}"
+        ssh_keyscan_types: rsa,ecdsa,ed25519
