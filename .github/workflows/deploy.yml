@@ -27,15 +27,15 @@ jobs:
         mkdir hyde-ext-release
         cp target/release/hyde-ext hyde-ext-release/
         cp assets.meta hyde-ext-release/
-        tar -czvf hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz hyde-ext-release
+        tar -czvf hyde-ext-${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz hyde-ext-release
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
-        asset_name: hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
+        asset_path: ./hyde-ext-${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
+        asset_name: hyde-ext-${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
         asset_content_type: application/gzip
 
   deploy_aur:
@@ -43,19 +43,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    - name: Get release version
-      id: get_version
-      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
     - name: Update PKGBUILD
       run: |
-        version="${{ steps.get_version.outputs.VERSION }}"
+        version="${GITHUB_REF#refs/tags/}"
         echo "Updating PKGBUILD to version $version"
         
         # Update version in PKGBUILD
-        sed -i "s/pkgver=.*/pkgver=$version/" template/hyde-ext/PKGBUILD
+        sed -i "s/pkgver=.*/pkgver=${version#v}/" template/hyde-ext/PKGBUILD
         
         # Construct download URL
-        download_url="https://github.com/Da4ndo/Hyde-Ext/releases/download/v${version}/hyde-ext-v${version}-x86_64-linux.tar.gz"
+        download_url="https://github.com/Da4ndo/Hyde-Ext/releases/download/$version/hyde-ext-$version-x86_64-linux.tar.gz"
         echo "Download URL: $download_url"
         
         # Update source in PKGBUILD
@@ -81,5 +78,5 @@ jobs:
         commit_username: ${{ secrets.AUR_USERNAME }}
         commit_email: ${{ secrets.AUR_EMAIL }}
         ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-        commit_message: "Update to version ${{ steps.get_version.outputs.VERSION }}"
+        commit_message: "Update to version ${GITHUB_REF#refs/tags/}"
         ssh_keyscan_types: rsa,ecdsa,ed25519
