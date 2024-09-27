@@ -19,15 +19,24 @@ jobs:
         toolchain: stable
     - name: Build
       run: cargo build --release
+    - name: Get version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+    - name: Create Release Archive
+      run: |
+        mkdir hyde-ext-release
+        cp target/release/hyde-ext hyde-ext-release/
+        cp assets.meta hyde-ext-release/
+        tar -czvf hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz hyde-ext-release
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: ./target/release/hyde-ext
-        asset_name: hyde-ext
-        asset_content_type: application/octet-stream
+        asset_path: ./hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
+        asset_name: hyde-ext-v${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz
+        asset_content_type: application/gzip
 
   deploy_aur:
     needs: build
@@ -39,21 +48,31 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
     - name: Update PKGBUILD
       run: |
-        sed -i "s/pkgver=.*/pkgver=${{ steps.get_version.outputs.VERSION }}/" template/hyde-ext/PKGBUILD
-        echo "Updating PKGBUILD to version ${{ steps.get_version.outputs.VERSION }}"
-        assets_url=$(curl -sL -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/releases/latest" | \
-          jq -r '.assets[0].browser_download_url')
-        echo "Assets URL: $assets_url"
-        if [ -z "$assets_url" ]; then
-          echo "Failed to fetch assets URL"
-          exit 1
-        fi
-        sed -i "s|source=.*|source=(\"$assets_url\")|" template/hyde-ext/PKGBUILD
+        version="${{ steps.get_version.outputs.VERSION }}"
+        echo "Updating PKGBUILD to version $version"
+        
+        # Update version in PKGBUILD
+        sed -i "s/pkgver=.*/pkgver=$version/" template/hyde-ext/PKGBUILD
+        
+        # Construct download URL
+        download_url="https://github.com/Da4ndo/Hyde-Ext/releases/download/v${version}/hyde-ext-v${version}-x86_64-linux.tar.gz"
+        echo "Download URL: $download_url"
+        
+        # Update source in PKGBUILD
+        sed -i "s|source=.*|source=(\"$download_url\")|" template/hyde-ext/PKGBUILD
+        
+        # Calculate SHA256 sum
         echo "Downloading asset for SHA256 calculation"
-        sha256sum=$(curl -sL "$assets_url" | sha256sum | cut -d ' ' -f 1)
+        sha256sum=$(curl -sL "$download_url" | sha256sum | cut -d ' ' -f 1)
         echo "SHA256: $sha256sum"
+        
+        # Update SHA256 sum in PKGBUILD
         sed -i "s/sha256sums=.*/sha256sums=('$sha256sum')/" template/hyde-ext/PKGBUILD
+
+        echo "Content of PKGBUILD:"
+        cat template/hyde-ext/PKGBUILD
+        echo "::debug::This is the content of the PKGBUILD file after updates"
+
     - name: Publish AUR package
       uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
       with:
