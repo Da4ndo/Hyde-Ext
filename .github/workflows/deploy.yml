@@ -24,10 +24,11 @@ jobs:
       run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
     - name: Create Release Archive
       run: |
-        mkdir hyde-ext-release
-        cp target/release/hyde-ext hyde-ext-release/
-        cp assets.meta hyde-ext-release/
-        tar -czvf hyde-ext-${{ steps.get_version.outputs.VERSION }}-x86_64-linux.tar.gz hyde-ext-release
+        RELEASE_DIR="hyde-ext-${{ steps.get_version.outputs.VERSION }}-x86_64-linux"
+        mkdir $RELEASE_DIR
+        cp target/release/hyde-ext $RELEASE_DIR/
+        cp assets.meta $RELEASE_DIR/
+        tar -czvf $RELEASE_DIR.tar.gz $RELEASE_DIR
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
