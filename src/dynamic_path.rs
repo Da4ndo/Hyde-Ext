@@ -13,7 +13,7 @@ pub fn get(relative_path: &str) -> PathBuf {
     }
     
     if !is_debug {
-        let release_path = PathBuf::from(format!("/etc/hyde-ext/{}/{}", env!("CARGO_PKG_NAME"), relative_path));
+        let release_path = PathBuf::from(format!("/etc/{}/{}", env!("CARGO_PKG_NAME"), relative_path));
         if debug_env {
             println!("{} Path (release): {:?}", "  :: Debug:".blue(), release_path);
         }
