@@ -345,7 +345,6 @@ fn append_custom_configs(
                 println!("{} {}", "  -> Skipping:".blue(), target_path.display());
                 return Ok(false);
             }
-            println!("\n");
 
             // Replace existing custom configuration or append to the end
             if let Some(custom_config_start) = target_file_content.find(
